@@ -28,8 +28,8 @@ docker compose up
 ```
 Применение миграций и запуск приложение осуществляется автоматически.
 
-```
 Запустите celery:
+
 ```
 docker compose exec backend bash
 cd group_cash_fees
