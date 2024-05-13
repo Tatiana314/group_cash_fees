@@ -1,3 +1,11 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Collect
+
+
+@admin.register(Collect)
+class CollectAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'name', 'description', 'author', 'organization',
+        'cause', 'create_date', 'close_date', 'max_amount'
+    )

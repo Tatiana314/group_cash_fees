@@ -15,7 +15,7 @@ class PaymentsViewSet(mixins.CreateModelMixin,
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_serializer_class(self):
-        if self.action in ('list',):
+        if self.action in ('list', 'retrieve'):
             return GetPaymentSerializer
         return CreatePaymentSerializer
 

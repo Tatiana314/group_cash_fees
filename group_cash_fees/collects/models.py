@@ -37,9 +37,7 @@ class Collect(models.Model):
     )
     cause = models.CharField("Повод", max_length=40)
     create_date = models.DateTimeField("Дата создания", auto_now_add=True)
-    close_date = models.DateTimeField(
-        "Дата завершения", blank=True, default=None
-    )
+    close_date = models.DateTimeField("Дата завершения")
     max_amount = models.PositiveIntegerField(
         "Максимальная сумма", blank=True, default=0
     )

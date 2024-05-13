@@ -13,13 +13,13 @@ VERSION = 'v1'
 router_1 = DefaultRouter()
 
 
+router_1.register('users', CustomUserViewSet, basename='users')
 router_1.register('organizations',
                   OrganizationViewSet, basename='organizations')
 router_1.register('collects',
                   CollectViewSet, basename='collects')
 router_1.register(r'collects/(?P<collect_id>\d+)/payments',
                   PaymentsViewSet, basename='payments')
-router_1.register('users', CustomUserViewSet, basename='users')
 
 
 urlpatterns = [

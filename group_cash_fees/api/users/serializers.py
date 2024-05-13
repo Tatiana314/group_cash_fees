@@ -16,7 +16,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         read_only_fields = (settings.LOGIN_FIELD,)
 
 
-class GetUserSerializer():
+class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("first_name", "last_name")

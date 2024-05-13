@@ -1,13 +1,13 @@
 import base64
-from datetime import datetime
 
 from django.core.files.base import ContentFile
+from django.utils import timezone
 from django.db.models import Sum
-from django.core.mail import send_mail
 from rest_framework import serializers
 
 from api.organizations.serializers import GetOrganizationSerializer
 from api.users.serializers import GetUserSerializer
+from api.tasks import task_send_email_message
 from collects.models import Collect
 
 
@@ -29,22 +29,16 @@ class GetCollectSerializer(serializers.ModelSerializer):
     check_peoples = serializers.SerializerMethodField()
 
     class Meta:
-        fields = (
-            "name",
-            "cause",
-            "image",
-            "organization",
-            "close_date",
-            "collected_amount",
-            "check_peoples"
-        )
+        fields = "__all__"
         model = Collect
 
     def get_collected_amount(self, obj):
-        return obj.payments.aggregate(Sum("invest_amount"))
+        return obj.payments.aggregate(
+            Sum('invest_amount')
+        ).get('invest_amount__sum')
 
     def get_check_peoples(self, obj):
-        return obj.payments.user.count()
+        return obj.payments.values('user').distinct().count()
 
 
 class CreateCollectSerializer(serializers.ModelSerializer):
@@ -53,23 +47,21 @@ class CreateCollectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collect
-        exclude = ("create_date",)
-        read_only_fields = ("author", "create_date")
+        exclude = ("create_date")
+        read_only_fields = ("author", "create_date", "collect")
 
     def validate_close_date(self, value):
-        if value and value <= datetime.datetime.now():
+        if value and value <= timezone.now():
             raise serializers.ValidationError(
                 'Дата завершения сбора не может быть меньше даты создания.'
             )
         return value
 
     def create(self, validated_data):
-        collect = Collect.objects.create(*validated_data)
-        send_mail(
+        collect = Collect.objects.create(**validated_data)
+        task_send_email_message(
                 subject="Денежный сбор создан.",
                 message="Денежный сбор успешно создан.",
-                from_email="sredawork@gmail.com",
-                recipient_list=[self.context["request"].user.email],
-                fail_silently=True
+                email=[self.context["request"].user.email],
         )
         return collect

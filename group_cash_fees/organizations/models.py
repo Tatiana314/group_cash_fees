@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 DATA = (
-    '{name}, {description:.15}, {email}, {address}, {invest_amount}'
+    '{name}, {description:.15}, {email}, {address}, {phone_number}'
 )
 MAX_LENGTH_EMAIL = 254
 MAX_LENGTH_ADRESS = 400
@@ -24,12 +24,12 @@ class Organization(models.Model):
         validators=[RegexValidator(
             regex='^8([0-9]{10})$', message='Некорректный ввод номера.'
         ),])
-    
+
     def __str__(self):
         return DATA.format(
             name=self.name,
             description=self.description,
             email=self.email,
             address=self.address,
-            cphone_number=self.phone_number,
+            phone_number=self.phone_number,
         )

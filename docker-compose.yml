@@ -2,14 +2,54 @@ version: '3'
 
 volumes:
   db:
+  static:
+  media: 
 
 services:
+
   db:
     container_name: db
     image: postgres:13.10
-    ports:
-      - 5432:5432
+    env_file: .env
     volumes:
-      - db:/var/lib/postgresql/data/
+      - db:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build: ./
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - static:/backend_static
+      - media:/app/media/
+    command: >
+     sh -c "python group_cash_fees/manage.py makemigrations &&
+     python group_cash_fees/manage.py migrate &&
+     python group_cash_fees/manage.py collectstatic --noinput &&
+     cp -r /app/group_cash_fees/backend_static/. /backend_static/static/&&
+     python group_cash_fees/manage.py runserver 0:8000"
+    restart: always
+
+  nginx:
+    image: nginx:1.22.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template
+      - static:/staticfiles/
+      - media:/media/
+    depends_on:
+      - backend
+
+    ports:
+      - 8000:80
+    restart: always
+
+  redis:
+    image: redis:alpine
     env_file:
       - .env
+    ports:
+      - "6379:6379"
+    restart: always
+  
